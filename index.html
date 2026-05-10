@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muhammad Hassan | Data Engineer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0e1a;
+      --surface:  #111827;
+      --card:     #1a2236;
+      --border:   #1e2d45;
+      --accent:   #3b82f6;
+      --accent2:  #06b6d4;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+      --tag-bg:   #1e3a5f;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(10,14,26,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-brand {
+      font-weight: 700; font-size: 1.1rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .9rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 80px 2rem 2rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,.15) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; text-align: center; max-width: 780px; }
+    .hero-badge {
+      display: inline-block;
+      background: var(--tag-bg); color: var(--accent2);
+      border: 1px solid rgba(6,182,212,.3);
+      border-radius: 999px; padding: .3rem 1rem;
+      font-size: .8rem; letter-spacing: .05em;
+      margin-bottom: 1.5rem;
+    }
+    .hero-name {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1.1;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: .75rem;
+    }
+    .hero-title {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: var(--muted); margin-bottom: 1.5rem;
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-desc {
+      color: var(--muted); max-width: 620px; margin: 0 auto 2.5rem;
+      font-size: .97rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: .75rem 1.8rem; border-radius: 8px; font-size: .95rem;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none;
+    }
+    .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+    .hero-stats {
+      display: flex; gap: 3rem; justify-content: center;
+      margin-top: 4rem; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 2rem; }
+    .section-inner { max-width: 1000px; margin: 0 auto; }
+    .section-label {
+      font-size: .8rem; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: .5rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 700; margin-bottom: 1rem;
+    }
+    .section-line {
+      width: 50px; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px; margin-bottom: 3rem;
+    }
+
+    /* ── ABOUT ── */
+    #about { background: var(--surface); }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+      align-items: start;
+    }
+    .about-text p { color: var(--muted); margin-bottom: 1rem; font-size: .97rem; }
+    .about-details { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.5rem; }
+    .detail-row { display: flex; gap: 1rem; align-items: center; }
+    .detail-icon { color: var(--accent); font-size: 1rem; width: 20px; flex-shrink: 0; }
+    .detail-row span { color: var(--muted); font-size: .92rem; }
+    .about-highlights { display: flex; flex-direction: column; gap: 1rem; }
+    .highlight-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.25rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .highlight-icon {
+      font-size: 1.5rem; flex-shrink: 0;
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 8px;
+    }
+    .highlight-card h4 { font-size: .95rem; margin-bottom: .3rem; }
+    .highlight-card p { font-size: .85rem; color: var(--muted); }
+
+    /* ── SKILLS ── */
+    .skills-grid { display: flex; flex-direction: column; gap: 2rem; }
+    .skill-group {}
+    .skill-group-title {
+      font-size: .95rem; font-weight: 600; color: var(--accent2);
+      margin-bottom: .75rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .skill-group-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .tag {
+      background: var(--tag-bg); color: var(--text);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 6px; padding: .35rem .85rem;
+      font-size: .82rem; transition: all .2s;
+    }
+    .tag:hover { border-color: var(--accent); color: var(--accent2); }
+
+    /* ── EXPERIENCE ── */
+    #experience { background: var(--surface); }
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item {
+      display: grid; grid-template-columns: 160px 1fr;
+      gap: 2rem; position: relative; padding-bottom: 3rem;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item::before {
+      content: '';
+      position: absolute; left: 168px; top: 8px;
+      width: 1px; height: calc(100% - 8px);
+      background: var(--border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-date {
+      text-align: right; color: var(--muted); font-size: .83rem; padding-top: .2rem;
+    }
+    .timeline-dot {
+      position: absolute; left: 160px;
+      top: 6px; width: 17px; height: 17px;
+      background: var(--accent); border-radius: 50%;
+      border: 3px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    #experience .timeline-dot { border-color: var(--surface); }
+    .timeline-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem;
+    }
+    .timeline-card:hover { border-color: var(--accent); }
+    .job-header { margin-bottom: 1rem; }
+    .job-title { font-size: 1.05rem; font-weight: 700; }
+    .job-company {
+      font-size: .88rem; color: var(--accent2); margin-top: .15rem;
+    }
+    .job-bullets { list-style: none; display: flex; flex-direction: column; gap: .45rem; }
+    .job-bullets li {
+      font-size: .88rem; color: var(--muted); padding-left: 1rem; position: relative;
+    }
+    .job-bullets li::before {
+      content: '▸'; position: absolute; left: 0; color: var(--accent);
+    }
+
+    /* ── PROJECTS ── */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .project-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.75rem;
+      transition: all .25s; cursor: default;
+    }
+    .project-card:hover {
+      border-color: var(--accent); transform: translateY(-4px);
+      box-shadow: 0 10px 40px rgba(59,130,246,.15);
+    }
+    .project-icon {
+      font-size: 1.8rem; margin-bottom: 1rem;
+      width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 10px;
+    }
+    .project-title { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+    .project-client { font-size: .8rem; color: var(--accent2); margin-bottom: .75rem; }
+    .project-desc { font-size: .87rem; color: var(--muted); margin-bottom: 1rem; }
+    .project-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .project-tags .tag { font-size: .75rem; padding: .2rem .6rem; }
+
+    /* ── EDUCATION ── */
+    #education { background: var(--surface); }
+    .edu-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 2rem;
+      display: grid; grid-template-columns: auto 1fr; gap: 1.5rem;
+    }
+    .edu-icon {
+      font-size: 2.5rem; width: 64px; height: 64px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 12px; flex-shrink: 0;
+    }
+    .edu-degree { font-size: 1.1rem; font-weight: 700; }
+    .edu-school { color: var(--accent2); font-size: .92rem; margin-top: .2rem; }
+    .edu-date { color: var(--muted); font-size: .82rem; margin-top: .2rem; margin-bottom: 1rem; }
+    .edu-points { list-style: none; display: flex; flex-direction: column; gap: .4rem; }
+    .edu-points li {
+      font-size: .87rem; color: var(--muted);
+      padding-left: 1rem; position: relative;
+    }
+    .edu-points li::before {
+      content: '▸'; position: absolute; left: 0; color: var(--accent);
+    }
+
+    /* ── CONTACT ── */
+    .contact-wrapper {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+    }
+    .contact-info { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1rem; }
+    .contact-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.25rem;
+      display: flex; gap: 1rem; align-items: center;
+      text-decoration: none; color: var(--text);
+      transition: all .2s;
+    }
+    .contact-card:hover { border-color: var(--accent); transform: translateX(4px); }
+    .contact-card-icon {
+      font-size: 1.3rem; width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 8px; flex-shrink: 0;
+    }
+    .contact-card h4 { font-size: .88rem; color: var(--muted); }
+    .contact-card p { font-size: .95rem; font-weight: 500; }
+    .contact-text p { color: var(--muted); margin-bottom: 1rem; font-size: .97rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem;
+      color: var(--muted); font-size: .85rem;
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: all .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      .about-grid, .contact-wrapper { grid-template-columns: 1fr; }
+      .timeline-item { grid-template-columns: 1fr; }
+      .timeline-item::before, .timeline-dot { display: none; }
+      .timeline-date { text-align: left; }
+      .edu-card { grid-template-columns: 1fr; }
+      nav .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">MH</span>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">&#x26A1; Available for new opportunities</div>
+    <h1 class="hero-name">Muhammad Hassan</h1>
+    <p class="hero-title">Senior <span>Data Engineer</span> &amp; Cloud Analytics Specialist</p>
+    <p class="hero-desc">
+      Building scalable data pipelines, cloud architectures, and enterprise analytics solutions
+      using Azure, Databricks, Microsoft Fabric, and Power BI.
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-primary">Get In Touch</a>
+      <a href="#experience" class="btn btn-outline">View Experience</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">13+</div><div class="stat-label">Years Experience</div></div>
+      <div class="stat"><div class="stat-num">5.6M</div><div class="stat-label">NSN Components Managed</div></div>
+      <div class="stat"><div class="stat-num">600+</div><div class="stat-label">Tables Analysed</div></div>
+      <div class="stat"><div class="stat-num">20+</div><div class="stat-label">BI Environments Built</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <p class="section-label">About Me</p>
+    <h2 class="section-title">Who I Am</h2>
+    <div class="section-line"></div>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>
+          A strategic and results-driven Data Engineer with expertise in developing modern
+          cloud-based data solutions. Skilled in designing scalable data architectures,
+          including unified storage systems, semantic models, and dimensional data modelling
+          to support enterprise analytics.
+        </p>
+        <p>
+          Experienced in building end-to-end data pipelines and supporting migration of legacy
+          data platforms to Microsoft Fabric for modern, unified analytics. Strong in querying,
+          data transformation, and automating workflows to improve data accessibility and reliability.
+        </p>
+        <p>
+          A self-starter and strategic thinker, known for independently driving high-impact
+          initiatives aligned with business goals. Committed to agile delivery, data governance,
+          automation, and continuous professional development.
+        </p>
+        <div class="about-details">
+          <div class="detail-row"><span class="detail-icon">&#x1F4CD;</span><span>Greater Leeds Area, UK</span></div>
+          <div class="detail-row"><span class="detail-icon">&#x1F4E7;</span><span>lasane.786@gmail.com</span></div>
+          <div class="detail-row"><span class="detail-icon">&#x1F4DE;</span><span>+44 7471 129930</span></div>
+          <div class="detail-row"><span class="detail-icon">&#x1F697;</span><span>UK Driving Licence</span></div>
+        </div>
+      </div>
+      <div class="about-highlights">
+        <div class="highlight-card">
+          <div class="highlight-icon">&#x2601;&#xFE0F;</div>
+          <div>
+            <h4>Cloud Data Engineering</h4>
+            <p>Azure Data Factory, Databricks, Synapse Analytics, Microsoft Fabric</p>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon">&#x1F9E0;</div>
+          <div>
+            <h4>Machine Learning &amp; AI</h4>
+            <p>Predictive analytics, ML algorithms in Python, Azure Cognitive Services</p>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon">&#x1F4CA;</div>
+          <div>
+            <h4>Business Intelligence</h4>
+            <p>Power BI, SSRS, SSAS, DAX, enterprise reporting environments</p>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon">&#x1F6E1;&#xFE0F;</div>
+          <div>
+            <h4>Data Governance</h4>
+            <p>GDPR compliance, data masking, RBAC, metadata lineage, Azure Purview</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-inner">
+    <p class="section-label">Technical Skills</p>
+    <h2 class="section-title">What I Work With</h2>
+    <div class="section-line"></div>
+    <div class="skills-grid reveal">
+
+      <div class="skill-group">
+        <div class="skill-group-title">Data Engineering &amp; Analytics</div>
+        <div class="tags">
+          <span class="tag">SQL / T-SQL</span><span class="tag">KQL</span>
+          <span class="tag">Delta Lake</span><span class="tag">Delta Tables</span>
+          <span class="tag">DAX</span><span class="tag">Apache Spark</span>
+          <span class="tag">ETL Pipelines</span><span class="tag">CI/CD</span>
+          <span class="tag">Big Data Analytics</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-title">Azure &amp; Microsoft Fabric</div>
+        <div class="tags">
+          <span class="tag">Azure Data Factory</span><span class="tag">Synapse Analytics</span>
+          <span class="tag">Azure Data Lake</span><span class="tag">Databricks</span>
+          <span class="tag">Microsoft Fabric</span><span class="tag">Power BI</span>
+          <span class="tag">Event House</span><span class="tag">Real-Time Stream Analytics</span>
+          <span class="tag">Snowflake</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-title">Database &amp; Data Warehousing</div>
+        <div class="tags">
+          <span class="tag">Star Schema</span><span class="tag">Snowflake Schema</span>
+          <span class="tag">Lakehouse Architecture</span><span class="tag">SSIS</span>
+          <span class="tag">SSAS</span><span class="tag">SSRS / PBRS</span>
+          <span class="tag">Schema Optimisation</span><span class="tag">Dimensional Modelling</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-title">Programming &amp; Scripting</div>
+        <div class="tags">
+          <span class="tag">Python</span><span class="tag">Pandas</span>
+          <span class="tag">NumPy</span><span class="tag">Selenium</span>
+          <span class="tag">BeautifulSoup</span><span class="tag">Power Query</span>
+          <span class="tag">Google Apps Script</span><span class="tag">VBA</span>
+          <span class="tag">C# (Intro)</span><span class="tag">Web Scraping</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-title">Data Governance &amp; Compliance</div>
+        <div class="tags">
+          <span class="tag">GDPR Compliance</span><span class="tag">Data Masking</span>
+          <span class="tag">RBAC</span><span class="tag">Metadata Lineage</span>
+          <span class="tag">Azure Purview</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-title">Tools &amp; Methodologies</div>
+        <div class="tags">
+          <span class="tag">Azure DevOps</span><span class="tag">GitHub</span>
+          <span class="tag">JIRA</span><span class="tag">Agile</span>
+          <span class="tag">SSDT</span><span class="tag">Excel / VBA</span>
+          <span class="tag">Power Pivot</span><span class="tag">Microsoft Access</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-inner">
+    <p class="section-label">Career History</p>
+    <h2 class="section-title">Work Experience</h2>
+    <div class="section-line"></div>
+    <div class="timeline">
+
+      <div class="timeline-item reveal">
+        <div class="timeline-date">Apr 2024 – Jan 2025</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="job-header">
+            <div class="job-title">Database Assistant</div>
+            <div class="job-company">Pickthall IT Consulting &mdash; Bradford, UK</div>
+          </div>
+          <ul class="job-bullets">
+            <li>Analysed sensitive data across 600+ tables for GDPR compliance and metadata consistency.</li>
+            <li>Implemented data masking and RBAC; created metadata lineage for regulatory tracking.</li>
+            <li>Applied DevOps practices to automate deployment and monitoring of compliance-related data workflows.</li>
+            <li>Collaborated on data governance initiatives involving Azure Purview and Snowflake sharing principles.</li>
+            <li>Designed innovative solutions for automating compliance checks across big data environments.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item reveal">
+        <div class="timeline-date">Apr 2018 – Dec 2022</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="job-header">
+            <div class="job-title">SQL Developer / Data Pipeline Engineer</div>
+            <div class="job-company">Brainiacs Co &mdash; Gujrat</div>
+          </div>
+          <ul class="job-bullets">
+            <li>Developed scalable ETL pipelines using Python and SSIS for seamless data integration into SQL databases.</li>
+            <li>Created and deployed data workflows via SSDT, managing multiple SSIS domains with scheduled automation.</li>
+            <li>Designed 20+ SSRS and Power BI Report Server (PBIRS) environments for enterprise applications.</li>
+            <li>Built dashboards and paginated reports using Power BI and SSRS, enhancing decision-making capabilities.</li>
+            <li>Built and deployed multidomain and tabular data models using Power Query, DAX, Power BI, and SSAS.</li>
+            <li>Wrote complex T-SQL queries for data extraction, transformation, and feature engineering across large datasets.</li>
+            <li>Automated data collection and transformation using Power Query, Python, and Google Apps Script.</li>
+            <li>Integrated CI/CD pipelines using GitHub to streamline data processes and support reliable deployments.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item reveal">
+        <div class="timeline-date">Apr 2012 – Apr 2018</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="job-header">
+            <div class="job-title">Data Analyst / Administrator</div>
+            <div class="job-company">Govt. of Punjab &mdash; Gujrat</div>
+          </div>
+          <ul class="job-bullets">
+            <li>Integrated data flow across 345 institutions using spreadsheet analytics and automated consolidation routines.</li>
+            <li>Managed payroll and budget using Excel and automated reporting with VBA and Google Apps Script.</li>
+            <li>Handled complex data analysis with pivot tables, macros, formulas, and automation scripting.</li>
+            <li>Helped boost student attendance from 60% to 85% by applying actionable outcome insights.</li>
+            <li>Identified 20,000 bogus student records to support expenditure regularisation.</li>
+            <li>Trained end users to adopt the newly developed system through in-person sessions and documentation.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-inner">
+    <p class="section-label">Featured Work</p>
+    <h2 class="section-title">Projects</h2>
+    <div class="section-line"></div>
+    <div class="projects-grid">
+
+      <div class="project-card reveal">
+        <div class="project-icon">&#x1F5C4;&#xFE0F;</div>
+        <div class="project-title">NSN Component Database</div>
+        <div class="project-client">US-Based Client</div>
+        <p class="project-desc">
+          Designed and deployed a data warehouse using Snowflake Schema to manage 5.6M NSN components.
+          Built ingestion pipelines for mining, cleaning, and integrating metadata. Developed complex
+          model queries, views, functions, and stored procedures to streamline cross-functional workflows.
+        </p>
+        <div class="project-tags">
+          <span class="tag">Snowflake Schema</span>
+          <span class="tag">Python</span>
+          <span class="tag">Data Warehouse</span>
+          <span class="tag">ETL</span>
+          <span class="tag">SQL</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-icon">&#x1F4C8;</div>
+        <div class="project-title">Defect Prediction System</div>
+        <div class="project-client">University of Bradford &mdash; VALEO</div>
+        <p class="project-desc">
+          Enhanced defect prediction systems for VALEO production lines using real-time analytics
+          and ML algorithms. Achieved distinction for this project. Delivered insights via Power BI
+          dashboards with advanced DAX and drill-through capabilities.
+        </p>
+        <div class="project-tags">
+          <span class="tag">Machine Learning</span>
+          <span class="tag">Python</span>
+          <span class="tag">Power BI</span>
+          <span class="tag">Real-Time Analytics</span>
+          <span class="tag">DAX</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-icon">&#x1F6E1;&#xFE0F;</div>
+        <div class="project-title">GDPR Compliance Automation</div>
+        <div class="project-client">Pickthall IT Consulting</div>
+        <p class="project-desc">
+          Automated compliance checks across 600+ database tables. Implemented RBAC and data masking
+          policies, built metadata lineage tracking, and leveraged Azure Purview for governance
+          across big data environments.
+        </p>
+        <div class="project-tags">
+          <span class="tag">Azure Purview</span>
+          <span class="tag">RBAC</span>
+          <span class="tag">Data Masking</span>
+          <span class="tag">GDPR</span>
+          <span class="tag">Azure DevOps</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-icon">&#x1F3EB;</div>
+        <div class="project-title">Education Data Integration</div>
+        <div class="project-client">Govt. of Punjab</div>
+        <p class="project-desc">
+          Integrated data flow across 345 educational institutions. Identified 20,000 bogus student
+          records saving public expenditure, and implemented analytics that boosted student attendance
+          from 60% to 85%.
+        </p>
+        <div class="project-tags">
+          <span class="tag">Excel / VBA</span>
+          <span class="tag">Google Apps Script</span>
+          <span class="tag">Data Analysis</span>
+          <span class="tag">Automation</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-inner">
+    <p class="section-label">Academic Background</p>
+    <h2 class="section-title">Education</h2>
+    <div class="section-line"></div>
+    <div class="edu-card reveal">
+      <div class="edu-icon">&#x1F393;</div>
+      <div>
+        <div class="edu-degree">MSc Big Data Science and Technology</div>
+        <div class="edu-school">University of Bradford, UK</div>
+        <div class="edu-date">January 2023 &ndash; March 2024 &middot; Distinction</div>
+        <ul class="edu-points">
+          <li>Specialised in machine learning, predictive analytics, and data visualisation with practical engineering focus.</li>
+          <li>Achieved distinction enhancing defect prediction systems for VALEO production lines using real-time analytics.</li>
+          <li>Delivered ML and analytics projects using space weather datasets with Power BI dashboards using advanced DAX.</li>
+          <li>Gained hands-on experience with SQL, Spark, Python, Databricks, Delta Lake, and Azure-based tools.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <p class="section-label">Get In Touch</p>
+    <h2 class="section-title">Contact</h2>
+    <div class="section-line"></div>
+    <div class="contact-wrapper">
+      <div class="reveal">
+        <p class="contact-text">
+          <p style="color:var(--muted);margin-bottom:1rem;">
+            Open to new data engineering and analytics roles across the UK.
+            Feel free to reach out via email or phone &mdash; I&rsquo;d love to connect.
+          </p>
+        </p>
+        <div class="contact-info">
+          <a class="contact-card" href="mailto:lasane.786@gmail.com">
+            <div class="contact-card-icon">&#x1F4E7;</div>
+            <div><h4>Email</h4><p>lasane.786@gmail.com</p></div>
+          </a>
+          <a class="contact-card" href="tel:+447471129930">
+            <div class="contact-card-icon">&#x1F4DE;</div>
+            <div><h4>Phone</h4><p>+44 7471 129930</p></div>
+          </a>
+          <div class="contact-card">
+            <div class="contact-card-icon">&#x1F4CD;</div>
+            <div><h4>Location</h4><p>Greater Leeds Area, UK</p></div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-card-icon">&#x1F697;</div>
+            <div><h4>Driving Licence</h4><p>Full UK Licence</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;">
+        <h3 style="margin-bottom:1.5rem;font-size:1.1rem;">Send a Message</h3>
+        <form onsubmit="handleForm(event)">
+          <div style="margin-bottom:1rem;">
+            <label style="display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;">Name</label>
+            <input id="f-name" type="text" placeholder="Your name" required
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+                     padding:.75rem 1rem;color:var(--text);font-size:.95rem;outline:none;
+                     transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'"
+              onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;">Email</label>
+            <input id="f-email" type="email" placeholder="your@email.com" required
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+                     padding:.75rem 1rem;color:var(--text);font-size:.95rem;outline:none;
+                     transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'"
+              onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="margin-bottom:1.5rem;">
+            <label style="display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;">Message</label>
+            <textarea id="f-msg" rows="4" placeholder="Your message..." required
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+                     padding:.75rem 1rem;color:var(--text);font-size:.95rem;outline:none;resize:vertical;
+                     transition:border-color .2s;font-family:inherit;"
+              onfocus="this.style.borderColor='var(--accent)'"
+              onblur="this.style.borderColor='var(--border)'"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Send Message</button>
+          <p id="form-msg" style="margin-top:1rem;font-size:.85rem;text-align:center;display:none;color:var(--accent2);">
+            Thanks! I'll get back to you soon.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2025 Muhammad Hassan &mdash; Data Engineer, Greater Leeds, UK</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => io.observe(r));
+
+  // Contact form (mailto fallback)
+  function handleForm(e) {
+    e.preventDefault();
+    const name = document.getElementById('f-name').value;
+    const email = document.getElementById('f-email').value;
+    const msg = document.getElementById('f-msg').value;
+    const subject = encodeURIComponent('Portfolio Contact from ' + name);
+    const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + msg);
+    window.location.href = 'mailto:lasane.786@gmail.com?subject=' + subject + '&body=' + body;
+    document.getElementById('form-msg').style.display = 'block';
+    e.target.reset();
+  }
+
+  // Active nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+    });
+  }, { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+services:
+  portfolio:
+    build: .
+    container_name: mh-portfolio
+    restart: unless-stopped
+    ports:
+      - "8085:80"
