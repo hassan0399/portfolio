@@ -31,24 +31,69 @@
     /* ── NAV ── */
     nav {
       position: fixed; top: 0; width: 100%; z-index: 100;
-      background: rgba(10,14,26,.85);
-      backdrop-filter: blur(12px);
+      background: rgba(10,14,26,.92);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: 0 2rem;
       display: flex; align-items: center; justify-content: space-between;
-      height: 60px;
+      height: 64px;
     }
     .nav-brand {
       font-weight: 700; font-size: 1.1rem;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-decoration: none;
+      flex-shrink: 0;
     }
-    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+    .nav-links { display: flex; gap: 1.6rem; list-style: none; }
     .nav-links a {
-      color: var(--muted); text-decoration: none; font-size: .9rem;
-      transition: color .2s;
+      color: var(--muted); text-decoration: none; font-size: .875rem;
+      font-weight: 500; letter-spacing: .01em;
+      transition: color .2s; position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px; transition: width .25s;
     }
     .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-links a.active { color: var(--text); }
+    .nav-links a.active::after { width: 100%; }
+
+    /* hamburger */
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; background: none; border: none; padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text); border-radius: 2px;
+      transition: all .25s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* mobile drawer */
+    .nav-drawer {
+      display: none; position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(10,14,26,.97); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem 1.5rem;
+      flex-direction: column; gap: .25rem;
+      z-index: 99;
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a {
+      color: var(--muted); text-decoration: none; font-size: .95rem;
+      font-weight: 500; padding: .65rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: color .2s;
+    }
+    .nav-drawer a:last-child { border-bottom: none; }
+    .nav-drawer a:hover, .nav-drawer a.active { color: var(--accent2); }
 
     /* ── HERO ── */
     #hero {
@@ -307,6 +352,20 @@
     .reveal { opacity: 0; transform: translateY(24px); transition: all .6s ease; }
     .reveal.visible { opacity: 1; transform: none; }
 
+    /* ── SCROLL TO TOP ── */
+    #scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 90;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      border: none; cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s, transform .3s, background .2s;
+      box-shadow: 0 4px 16px rgba(59,130,246,.35);
+    }
+    #scroll-top.visible { opacity: 1; pointer-events: auto; }
+    #scroll-top:hover { background: #2563eb; transform: translateY(-3px); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 720px) {
       .about-grid, .contact-wrapper { grid-template-columns: 1fr; }
@@ -315,6 +374,8 @@
       .timeline-date { text-align: left; }
       .edu-card { grid-template-columns: 1fr; }
       nav .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero-stats { gap: 1.5rem; }
     }
   </style>
 </head>
@@ -322,16 +383,31 @@
 
 <!-- NAV -->
 <nav>
-  <span class="nav-brand">MH</span>
+  <a href="#hero" class="nav-brand">MH</a>
   <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#education">Education</a></li>
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#about">About Me</a></li>
+    <li><a href="#skills">Technical Skills</a></li>
+    <li><a href="#experience">Career History</a></li>
+    <li><a href="#projects">Portfolio</a></li>
+    <li><a href="#education">Academics</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE DRAWER -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="#hero" class="drawer-link">Home</a>
+  <a href="#about" class="drawer-link">About Me</a>
+  <a href="#skills" class="drawer-link">Technical Skills</a>
+  <a href="#experience" class="drawer-link">Career History</a>
+  <a href="#projects" class="drawer-link">Portfolio</a>
+  <a href="#education" class="drawer-link">Academics</a>
+  <a href="#contact" class="drawer-link">Contact</a>
+</div>
 
 <!-- HERO -->
 <section id="hero">
@@ -750,6 +826,8 @@
   <p>&copy; 2025 Muhammad Hassan &mdash; Data Engineer, Greater Leeds, UK</p>
 </footer>
 
+<button id="scroll-top" aria-label="Scroll to top">&#8679;</button>
+
 <script>
   // Scroll reveal
   const reveals = document.querySelectorAll('.reveal');
@@ -771,15 +849,40 @@
     e.target.reset();
   }
 
-  // Active nav highlight
+  // Active nav highlight (desktop + drawer)
   const sections = document.querySelectorAll('section[id]');
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
-    document.querySelectorAll('.nav-links a').forEach(a => {
-      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+  function updateActive() {
+    let current = 'hero';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+    document.querySelectorAll('.nav-links a, .nav-drawer a').forEach(a => {
+      const href = a.getAttribute('href').replace('#', '');
+      a.classList.toggle('active', href === current);
     });
-  }, { passive: true });
+    // scroll-to-top
+    document.getElementById('scroll-top').classList.toggle('visible', window.scrollY > 400);
+  }
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+
+  // Scroll to top
+  document.getElementById('scroll-top').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Hamburger / mobile drawer
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('nav-drawer');
+  hamburger.addEventListener('click', () => {
+    const open = drawer.classList.toggle('open');
+    hamburger.classList.toggle('open', open);
+  });
+  // Close drawer on link click
+  drawer.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      drawer.classList.remove('open');
+      hamburger.classList.remove('open');
+    });
+  });
 </script>
 </body>
 </html>

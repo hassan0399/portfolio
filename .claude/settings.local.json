@@ -3,7 +3,9 @@
     "allow": [
       "Bash(gh auth *)",
       "Bash(git --version)",
-      "Bash(curl --version)"
+      "Bash(curl --version)",
+      "Bash(curl *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('login:', d.get\\('login'\\)\\); print\\('plan:', d.get\\('plan',{}\\).get\\('name','N/A'\\)\\)\")"
     ]
   }
 }
