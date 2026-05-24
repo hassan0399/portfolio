@@ -5,7 +5,11 @@
       "Bash(git --version)",
       "Bash(curl --version)",
       "Bash(curl *)",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('login:', d.get\\('login'\\)\\); print\\('plan:', d.get\\('plan',{}\\).get\\('name','N/A'\\)\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('login:', d.get\\('login'\\)\\); print\\('plan:', d.get\\('plan',{}\\).get\\('name','N/A'\\)\\)\")",
+      "Bash(git push *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('login','ERROR:'\\), d.get\\('message',''\\)\\)\")",
+      "Bash(git remote *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('html_url', d.get\\('message',''\\)\\)\\)\")"
     ]
   }
 }
