@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopify CSV Data Store | Muhammad Hassan</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0e1a;
+      --surface:  #111827;
+      --card:     #1a2236;
+      --border:   #1e2d45;
+      --accent:   #3b82f6;
+      --accent2:  #06b6d4;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+      --tag-bg:   #1e3a5f;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(10,14,26,.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-brand {
+      font-weight: 700; font-size: 1.1rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .nav-links { display: flex; gap: 1.6rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .875rem;
+      font-weight: 500; letter-spacing: .01em;
+      transition: color .2s; position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px; transition: width .25s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-links a.active { color: var(--text); }
+    .nav-links a.active::after { width: 100%; }
+
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; background: none; border: none; padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text); border-radius: 2px;
+      transition: all .25s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .nav-drawer {
+      display: none; position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(10,14,26,.97); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem 1.5rem;
+      flex-direction: column; gap: .25rem;
+      z-index: 99;
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a {
+      color: var(--muted); text-decoration: none; font-size: .95rem;
+      font-weight: 500; padding: .65rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: color .2s;
+    }
+    .nav-drawer a:last-child { border-bottom: none; }
+    .nav-drawer a:hover, .nav-drawer a.active { color: var(--accent2); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 70vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 80px 2rem 2rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,.15) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; text-align: center; max-width: 720px; }
+    .hero-badge {
+      display: inline-block;
+      background: var(--tag-bg); color: var(--accent2);
+      border: 1px solid rgba(6,182,212,.3);
+      border-radius: 999px; padding: .3rem 1rem;
+      font-size: .8rem; letter-spacing: .05em;
+      margin-bottom: 1.5rem;
+    }
+    .hero-name {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.15;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: .75rem;
+    }
+    .hero-desc {
+      color: var(--muted); max-width: 560px; margin: 0 auto 2.5rem;
+      font-size: .97rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: .75rem 1.8rem; border-radius: 8px; font-size: .95rem;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border: none; }
+    .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 2rem; }
+    .section-inner { max-width: 1000px; margin: 0 auto; }
+    .section-label {
+      font-size: .8rem; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: .5rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 700; margin-bottom: 1rem;
+    }
+    .section-line {
+      width: 50px; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px; margin-bottom: 3rem;
+    }
+
+    /* ── PRODUCTS ── */
+    #products { background: var(--surface); }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .product-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.75rem;
+      display: flex; flex-direction: column;
+      transition: all .25s;
+    }
+    .product-card:hover {
+      border-color: var(--accent); transform: translateY(-4px);
+      box-shadow: 0 10px 40px rgba(59,130,246,.15);
+    }
+    .product-icon {
+      font-size: 1.8rem; margin-bottom: 1rem;
+      width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 10px;
+    }
+    .product-name { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; }
+    .product-desc { font-size: .87rem; color: var(--muted); margin-bottom: 1rem; flex: 1; }
+    .product-includes {
+      font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--accent2); margin-bottom: .6rem; font-weight: 600;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.25rem; }
+    .tag {
+      background: var(--tag-bg); color: var(--text);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 6px; padding: .2rem .6rem;
+      font-size: .75rem; transition: all .2s;
+    }
+    .product-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-top: auto; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .product-price {
+      font-size: .82rem; color: var(--muted);
+    }
+    .product-price strong { color: var(--accent2); font-size: .95rem; display: block; }
+    .btn-sm {
+      padding: .5rem 1.1rem; border-radius: 7px; font-size: .83rem;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all .2s; white-space: nowrap;
+      background: var(--accent); color: #fff; border: none;
+    }
+    .btn-sm:hover { background: #2563eb; transform: translateY(-1px); }
+
+    /* ── HOW IT WORKS ── */
+    #how-it-works { background: var(--bg); }
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+    }
+    .step-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.75rem; text-align: center;
+      position: relative;
+    }
+    .step-number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-weight: 800; font-size: 1rem;
+      margin: 0 auto 1rem;
+    }
+    .step-icon { font-size: 1.8rem; margin-bottom: .75rem; display: block; }
+    .step-title { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+    .step-desc { font-size: .87rem; color: var(--muted); }
+
+    /* ── WHY ── */
+    #why { background: var(--surface); }
+    .why-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .why-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .why-icon {
+      font-size: 1.5rem; flex-shrink: 0;
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 8px;
+    }
+    .why-card h4 { font-size: .95rem; margin-bottom: .3rem; }
+    .why-card p { font-size: .85rem; color: var(--muted); }
+
+    /* ── CTA BANNER ── */
+    #cta {
+      background: var(--bg);
+    }
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(59,130,246,.12), rgba(6,182,212,.08));
+      border: 1px solid rgba(59,130,246,.25);
+      border-radius: 16px; padding: 3rem 2rem; text-align: center;
+    }
+    .cta-banner h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; margin-bottom: .75rem; }
+    .cta-banner p { color: var(--muted); max-width: 520px; margin: 0 auto 2rem; font-size: .97rem; }
+
+    /* ── FAQ ── */
+    #faq { background: var(--surface); }
+    .faq-list { display: flex; flex-direction: column; gap: .75rem; }
+    .faq-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .faq-question {
+      width: 100%; background: none; border: none; color: var(--text);
+      font-family: inherit; font-size: .95rem; font-weight: 600;
+      padding: 1.1rem 1.5rem; text-align: left; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; transition: color .2s;
+    }
+    .faq-question:hover { color: var(--accent2); }
+    .faq-chevron {
+      flex-shrink: 0; font-size: 1.1rem; color: var(--accent);
+      transition: transform .25s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease;
+      padding: 0 1.5rem; color: var(--muted); font-size: .88rem;
+    }
+    .faq-item.open .faq-answer { max-height: 200px; padding: 0 1.5rem 1.25rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem;
+      color: var(--muted); font-size: .85rem;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: all .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── SCROLL TO TOP ── */
+    #scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 90;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      border: none; cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s, transform .3s, background .2s;
+      box-shadow: 0 4px 16px rgba(59,130,246,.35);
+    }
+    #scroll-top.visible { opacity: 1; pointer-events: auto; }
+    #scroll-top:hover { background: #2563eb; transform: translateY(-3px); }
+
+    /* ── AUTOMATION SERVICES ── */
+    #automation { background: var(--bg); }
+    .service-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .service-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 2rem;
+      display: flex; flex-direction: column; gap: 1.25rem;
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .service-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 12px 48px rgba(59,130,246,.18);
+    }
+    .service-card-header { display: flex; gap: 1rem; align-items: flex-start; }
+    .service-icon {
+      font-size: 1.8rem; flex-shrink: 0;
+      width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+      background: var(--tag-bg); border-radius: 10px;
+    }
+    .service-name { font-size: 1.1rem; font-weight: 700; margin-bottom: .3rem; }
+    .service-badge {
+      display: inline-block;
+      background: rgba(59,130,246,.15); color: var(--accent2);
+      border: 1px solid rgba(6,182,212,.25);
+      border-radius: 999px; padding: .15rem .7rem;
+      font-size: .72rem; letter-spacing: .04em; font-weight: 600;
+    }
+    .service-desc { font-size: .88rem; color: var(--muted); }
+    .service-features { list-style: none; display: flex; flex-direction: column; gap: .45rem; }
+    .service-features li {
+      font-size: .87rem; color: var(--muted);
+      padding-left: 1.25rem; position: relative;
+    }
+    .service-features li::before {
+      content: '▸'; position: absolute; left: 0; color: var(--accent2); font-size: .8rem;
+    }
+
+    /* pipeline flow diagram */
+    .pipeline-flow {
+      display: flex; align-items: center; flex-wrap: wrap; gap: .3rem;
+      margin: .25rem 0;
+    }
+    .flow-node {
+      background: var(--tag-bg); border: 1px solid rgba(59,130,246,.3);
+      border-radius: 7px; padding: .3rem .7rem;
+      font-size: .75rem; font-weight: 600; color: var(--accent2);
+      white-space: nowrap;
+    }
+    .flow-arrow {
+      color: var(--accent); font-size: .85rem; flex-shrink: 0;
+    }
+    .flow-label {
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: .4rem; font-weight: 600;
+    }
+
+    .service-tech { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .service-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-top: auto; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .service-price {
+      font-size: .82rem; color: var(--muted);
+    }
+    .service-price strong { color: var(--accent2); font-size: .95rem; display: block; }
+
+    /* ── INTEGRATIONS STRIP ── */
+    #integrations { background: var(--surface); }
+    .integrations-intro { font-size: .97rem; color: var(--muted); max-width: 600px; margin-bottom: 2.5rem; }
+    .integration-group { margin-bottom: 2rem; }
+    .integration-group-title {
+      font-size: .8rem; text-transform: uppercase; letter-spacing: .12em;
+      color: var(--accent); font-weight: 600; margin-bottom: .8rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .integration-group-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .integration-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .chip {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: .45rem 1rem;
+      font-size: .83rem; font-weight: 500; color: var(--text);
+      display: flex; align-items: center; gap: .5rem;
+      transition: border-color .2s, color .2s;
+    }
+    .chip:hover { border-color: var(--accent2); color: var(--accent2); }
+    .chip-icon { font-size: 1rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      nav .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .pipeline-flow { gap: .2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">MH</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#automation">Automation</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="index.html" class="drawer-link">Home</a>
+  <a href="#products" class="drawer-link">Products</a>
+  <a href="#how-it-works" class="drawer-link">How It Works</a>
+  <a href="#automation" class="drawer-link">Automation</a>
+  <a href="#faq" class="drawer-link">FAQ</a>
+  <a href="index.html#contact" class="drawer-link">Contact</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">&#x1F6CD;&#xFE0F; Shopify Data Products</div>
+    <h1 class="hero-name">Shopify-Ready CSV Files</h1>
+    <p class="hero-desc">
+      Clean, validated spreadsheet files built to Shopify&rsquo;s exact import spec.
+      Drop them straight into your store admin &mdash; no reformatting, no errors.
+    </p>
+    <div class="hero-cta">
+      <a href="#products" class="btn btn-primary">Browse Products</a>
+      <a href="index.html" class="btn btn-outline">Back to Portfolio</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="section-inner">
+    <p class="section-label">Available Files</p>
+    <h2 class="section-title">Data Products</h2>
+    <div class="section-line"></div>
+    <div class="products-grid">
+
+      <!-- Product 1 -->
+      <div class="product-card reveal">
+        <div class="product-icon">&#x1F6CD;&#xFE0F;</div>
+        <div class="product-name">Products Catalogue CSV</div>
+        <p class="product-desc">
+          A complete product import file with all required and optional Shopify columns.
+          Supports variants, multiple images, SEO fields, and metafields.
+        </p>
+        <div class="product-includes">Included columns</div>
+        <div class="tags">
+          <span class="tag">Title</span>
+          <span class="tag">Handle</span>
+          <span class="tag">SKU</span>
+          <span class="tag">Price</span>
+          <span class="tag">Compare at Price</span>
+          <span class="tag">Vendor</span>
+          <span class="tag">Type</span>
+          <span class="tag">Tags</span>
+          <span class="tag">Variant Options</span>
+          <span class="tag">Inventory Qty</span>
+          <span class="tag">Image URLs</span>
+          <span class="tag">SEO Title &amp; Desc</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <strong>Contact for pricing</strong>
+            Custom row count available
+          </div>
+          <a href="mailto:lasane.786@gmail.com?subject=CSV%20Order%3A%20Products%20Catalogue&body=Hi%20Hassan%2C%0A%0AI%27m%20interested%20in%20the%20Products%20Catalogue%20CSV.%0A%0ADetails%3A%0A-%20Estimated%20number%20of%20products%3A%0A-%20Any%20specific%20categories%20or%20fields%20needed%3A%0A%0AThanks" class="btn-sm">Order via Email</a>
+        </div>
+      </div>
+
+      <!-- Product 2 -->
+      <div class="product-card reveal">
+        <div class="product-icon">&#x1F465;</div>
+        <div class="product-name">Customers List CSV</div>
+        <p class="product-desc">
+          Customer import template with all fields Shopify expects, including addresses,
+          marketing consent, and tags for segmentation.
+        </p>
+        <div class="product-includes">Included columns</div>
+        <div class="tags">
+          <span class="tag">First Name</span>
+          <span class="tag">Last Name</span>
+          <span class="tag">Email</span>
+          <span class="tag">Phone</span>
+          <span class="tag">Address</span>
+          <span class="tag">City</span>
+          <span class="tag">Province</span>
+          <span class="tag">Country</span>
+          <span class="tag">Postal Code</span>
+          <span class="tag">Tags</span>
+          <span class="tag">Accepts Marketing</span>
+          <span class="tag">Total Spent</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <strong>Contact for pricing</strong>
+            Custom row count available
+          </div>
+          <a href="mailto:lasane.786@gmail.com?subject=CSV%20Order%3A%20Customers%20List&body=Hi%20Hassan%2C%0A%0AI%27m%20interested%20in%20the%20Customers%20List%20CSV.%0A%0ADetails%3A%0A-%20Estimated%20number%20of%20customers%3A%0A-%20Any%20specific%20fields%20needed%3A%0A%0AThanks" class="btn-sm">Order via Email</a>
+        </div>
+      </div>
+
+      <!-- Product 3 -->
+      <div class="product-card reveal">
+        <div class="product-icon">&#x1F4E6;</div>
+        <div class="product-name">Inventory &amp; Stock CSV</div>
+        <p class="product-desc">
+          Inventory import file for updating stock levels across one or multiple Shopify
+          locations. Matches the Shopify inventory import format exactly.
+        </p>
+        <div class="product-includes">Included columns</div>
+        <div class="tags">
+          <span class="tag">Handle</span>
+          <span class="tag">Title</span>
+          <span class="tag">SKU</span>
+          <span class="tag">Option1 Name</span>
+          <span class="tag">Option1 Value</span>
+          <span class="tag">Location</span>
+          <span class="tag">On Hand</span>
+          <span class="tag">Available</span>
+          <span class="tag">Incoming</span>
+          <span class="tag">Committed</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <strong>Contact for pricing</strong>
+            Multi-location supported
+          </div>
+          <a href="mailto:lasane.786@gmail.com?subject=CSV%20Order%3A%20Inventory%20%26%20Stock&body=Hi%20Hassan%2C%0A%0AI%27m%20interested%20in%20the%20Inventory%20%26%20Stock%20CSV.%0A%0ADetails%3A%0A-%20Number%20of%20SKUs%3A%0A-%20Number%20of%20locations%3A%0A%0AThanks" class="btn-sm">Order via Email</a>
+        </div>
+      </div>
+
+      <!-- Product 4 -->
+      <div class="product-card reveal">
+        <div class="product-icon">&#x1F3F7;&#xFE0F;</div>
+        <div class="product-name">Collections &amp; Metafields CSV</div>
+        <p class="product-desc">
+          Collection import template plus a metafields CSV for custom product and variant
+          attributes. Essential for stores with rich product data or custom storefronts.
+        </p>
+        <div class="product-includes">Included columns</div>
+        <div class="tags">
+          <span class="tag">Collection Handle</span>
+          <span class="tag">Title</span>
+          <span class="tag">Description</span>
+          <span class="tag">Image URL</span>
+          <span class="tag">Sort Order</span>
+          <span class="tag">Rules (Smart)</span>
+          <span class="tag">Metafield Namespace</span>
+          <span class="tag">Metafield Key</span>
+          <span class="tag">Metafield Value</span>
+          <span class="tag">Metafield Type</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <strong>Contact for pricing</strong>
+            Smart &amp; manual collections
+          </div>
+          <a href="mailto:lasane.786@gmail.com?subject=CSV%20Order%3A%20Collections%20%26%20Metafields&body=Hi%20Hassan%2C%0A%0AI%27m%20interested%20in%20the%20Collections%20%26%20Metafields%20CSV.%0A%0ADetails%3A%0A-%20Number%20of%20collections%3A%0A-%20Metafield%20types%20needed%3A%0A%0AThanks" class="btn-sm">Order via Email</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <p class="section-label">Process</p>
+    <h2 class="section-title">How It Works</h2>
+    <div class="section-line"></div>
+    <div class="steps-grid">
+
+      <div class="step-card reveal">
+        <span class="step-number">1</span>
+        <span class="step-icon">&#x1F4CB;</span>
+        <div class="step-title">Browse &amp; Choose</div>
+        <p class="step-desc">
+          Pick the CSV type you need above. Each product lists the exact columns included
+          so you know what you&rsquo;re getting before you order.
+        </p>
+      </div>
+
+      <div class="step-card reveal">
+        <span class="step-number">2</span>
+        <span class="step-icon">&#x1F4E7;</span>
+        <div class="step-title">Email to Discuss</div>
+        <p class="step-desc">
+          Click &ldquo;Order via Email&rdquo; and describe your requirements &mdash; row count,
+          categories, or any custom fields. I&rsquo;ll confirm pricing and turnaround.
+        </p>
+      </div>
+
+      <div class="step-card reveal">
+        <span class="step-number">3</span>
+        <span class="step-icon">&#x2705;</span>
+        <div class="step-title">Receive &amp; Import</div>
+        <p class="step-desc">
+          You receive a validated CSV ready to upload in Shopify Admin &rarr; Products &rarr;
+          Import. No reformatting needed &mdash; just upload and go.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- WHY THESE FILES -->
+<section id="why">
+  <div class="section-inner">
+    <p class="section-label">Why Us</p>
+    <h2 class="section-title">Built for Shopify</h2>
+    <div class="section-line"></div>
+    <div class="why-grid">
+
+      <div class="why-card reveal">
+        <div class="why-icon">&#x2705;</div>
+        <div>
+          <h4>Shopify-Validated Format</h4>
+          <p>Column headers match Shopify&rsquo;s exact import spec for products, customers,
+            inventory, and collections &mdash; no guesswork.</p>
+        </div>
+      </div>
+
+      <div class="why-card reveal">
+        <div class="why-icon">&#x1F9F9;</div>
+        <div>
+          <h4>Clean &amp; Error-Free</h4>
+          <p>Files are checked for encoding issues, extra columns, and formatting errors
+            before delivery. Imports succeed on the first try.</p>
+        </div>
+      </div>
+
+      <div class="why-card reveal">
+        <div class="why-icon">&#x2699;&#xFE0F;</div>
+        <div>
+          <h4>Tailored on Request</h4>
+          <p>Need a specific row count, category set, or additional columns? Just mention
+            it in your email and I&rsquo;ll customise the file to your store.</p>
+        </div>
+      </div>
+
+      <div class="why-card reveal">
+        <div class="why-icon">&#x26A1;</div>
+        <div>
+          <h4>Fast Turnaround</h4>
+          <p>Standard files are delivered within 24&ndash;48 hours. Custom requirements
+            may take slightly longer &mdash; timeline agreed upfront.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- AUTOMATION SERVICES -->
+<section id="automation">
+  <div class="section-inner">
+    <p class="section-label">Automation Services</p>
+    <h2 class="section-title">Fully Automated Pipelines</h2>
+    <div class="section-line"></div>
+    <div class="service-cards">
+
+      <!-- Service 1: Vendor Catalog Pipeline -->
+      <div class="service-card reveal">
+        <div class="service-card-header">
+          <div class="service-icon">&#x1F504;</div>
+          <div>
+            <div class="service-name">Vendor Catalog Pipeline</div>
+            <span class="service-badge">Auto-updating</span>
+          </div>
+        </div>
+        <p class="service-desc">
+          A fully automated pipeline that pulls product data directly from your supplier
+          or vendor website (or their API), transforms it into Shopify&rsquo;s exact format,
+          and pushes new or updated products into your store on a schedule &mdash; no manual
+          exports or copy-pasting.
+        </p>
+        <div>
+          <div class="flow-label">Data flow</div>
+          <div class="pipeline-flow">
+            <span class="flow-node">Vendor Website / API</span>
+            <span class="flow-arrow">&#x2192;</span>
+            <span class="flow-node">Scrape &amp; Extract</span>
+            <span class="flow-arrow">&#x2192;</span>
+            <span class="flow-node">Transform &amp; Clean</span>
+            <span class="flow-arrow">&#x2192;</span>
+            <span class="flow-node">Shopify Products</span>
+          </div>
+        </div>
+        <ul class="service-features">
+          <li>Scheduled runs — hourly, daily, or on-demand</li>
+          <li>New product detection &amp; automatic creation in Shopify</li>
+          <li>Price &amp; stock changes reflected within minutes</li>
+          <li>Image URL mapping and variant field normalisation</li>
+          <li>Conflict resolution — skip, overwrite, or flag for review</li>
+          <li>Error logging and email alerts on pipeline failure</li>
+        </ul>
+        <div>
+          <div class="flow-label">Built with</div>
+          <div class="service-tech">
+            <span class="tag">Python</span>
+            <span class="tag">Selenium</span>
+            <span class="tag">BeautifulSoup</span>
+            <span class="tag">Requests / REST</span>
+            <span class="tag">Pandas</span>
+            <span class="tag">Shopify Admin API</span>
+            <span class="tag">Scheduled Tasks / Cron</span>
+          </div>
+        </div>
+        <div class="service-footer">
+          <div class="service-price">
+            <strong>Contact for scoping</strong>
+            Priced per project / monthly retainer
+          </div>
+          <a href="mailto:lasane.786@gmail.com?subject=Enquiry%3A%20Vendor%20Catalog%20Pipeline&body=Hi%20Hassan%2C%0A%0AI%27m%20interested%20in%20setting%20up%20an%20automated%20vendor%20catalog%20pipeline.%0A%0ADetails%3A%0A-%20Vendor%20website%20or%20API%20URL%3A%0A-%20Estimated%20number%20of%20products%3A%0A-%20Update%20frequency%20needed%3A%0A-%20Shopify%20store%20URL%3A%0A%0AThanks" class="btn-sm">Enquire Now</a>
+        </div>
+      </div>
+
+      <!-- Service 2: Cross-Platform Stock Sync -->
+      <div class="service-card reveal">
+        <div class="service-card-header">
+          <div class="service-icon">&#x1F501;</div>
+          <div>
+            <div class="service-name">Cross-Platform Stock Sync</div>
+            <span class="service-badge">Multi-channel</span>
+          </div>
+        </div>
+        <p class="service-desc">
+          Keep inventory levels consistent across Shopify, your POS system, other
+          e-commerce platforms, and backend databases &mdash; automatically. Sell on multiple
+          channels without the risk of overselling or manual stock reconciliation.
+        </p>
+        <div>
+          <div class="flow-label">Sync architecture</div>
+          <div class="pipeline-flow">
+            <span class="flow-node">Shopify</span>
+            <span class="flow-arrow">&#x21C4;</span>
+            <span class="flow-node">Sync Engine</span>
+            <span class="flow-arrow">&#x21C4;</span>
+            <span class="flow-node">POS / Other Stores / DB</span>
+          </div>
+        </div>
+        <ul class="service-features">
+          <li>Bi-directional sync &mdash; changes in any system propagate everywhere</li>
+          <li>Webhook-driven for near real-time updates on sales</li>
+          <li>Supports multiple Shopify locations &amp; warehouses</li>
+          <li>Handles POS platforms: Square, Lightspeed, EPOS Now</li>
+          <li>Other store connectors: WooCommerce, eBay, Amazon, Etsy</li>
+          <li>Database sync: SQL Server, PostgreSQL, MySQL, Google Sheets</li>
+          <li>Conflict resolution with audit log for every stock movement</li>
+        </ul>
+        <div>
+          <div class="flow-label">Built with</div>
+          <div class="service-tech">
+            <span class="tag">Shopify Admin API</span>
+            <span class="tag">Webhooks</span>
+            <span class="tag">Python</span>
+            <span class="tag">REST APIs</span>
+            <span class="tag">SQL / PostgreSQL</span>
+            <span class="tag">Azure / Cloud Host</span>
+            <span class="tag">Scheduled Tasks</span>
+          </div>
+        </div>
+        <div class="service-footer">
+          <div class="service-price">
+            <strong>Contact for scoping</strong>
+            Priced per integration / monthly retainer
+          </div>
+          <a href="mailto:lasane.786@gmail.com?subject=Enquiry%3A%20Cross-Platform%20Stock%20Sync&body=Hi%20Hassan%2C%0A%0AI%27m%20interested%20in%20cross-platform%20inventory%20sync.%0A%0ADetails%3A%0A-%20Shopify%20store%20URL%3A%0A-%20Other%20platforms%20to%20sync%20(POS%2C%20WooCommerce%2C%20etc.)%3A%0A-%20Approximate%20number%20of%20SKUs%3A%0A-%20Update%20frequency%20needed%3A%0A%0AThanks" class="btn-sm">Enquire Now</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section id="integrations">
+  <div class="section-inner">
+    <p class="section-label">Integrations</p>
+    <h2 class="section-title">Supported Platforms</h2>
+    <div class="section-line"></div>
+    <p class="integrations-intro reveal">
+      The pipelines and sync engines are built to connect with the platforms you already use.
+      Don&rsquo;t see yours? Get in touch &mdash; if it has an API or export, it can be integrated.
+    </p>
+
+    <div class="integration-group reveal">
+      <div class="integration-group-title">E-commerce Platforms</div>
+      <div class="integration-chips">
+        <span class="chip"><span class="chip-icon">&#x1F6CD;&#xFE0F;</span> Shopify</span>
+        <span class="chip"><span class="chip-icon">&#x1F6D2;</span> WooCommerce</span>
+        <span class="chip"><span class="chip-icon">&#x1F4E6;</span> Amazon Seller</span>
+        <span class="chip"><span class="chip-icon">&#x1F4B0;</span> eBay</span>
+        <span class="chip"><span class="chip-icon">&#x1F9F5;</span> Etsy</span>
+        <span class="chip"><span class="chip-icon">&#x1F310;</span> BigCommerce</span>
+        <span class="chip"><span class="chip-icon">&#x1F4BB;</span> Magento / Adobe Commerce</span>
+      </div>
+    </div>
+
+    <div class="integration-group reveal">
+      <div class="integration-group-title">Point of Sale (POS)</div>
+      <div class="integration-chips">
+        <span class="chip"><span class="chip-icon">&#x1F4B3;</span> Square POS</span>
+        <span class="chip"><span class="chip-icon">&#x26A1;</span> Lightspeed</span>
+        <span class="chip"><span class="chip-icon">&#x1F5A5;&#xFE0F;</span> EPOS Now</span>
+        <span class="chip"><span class="chip-icon">&#x1F4F1;</span> Shopify POS</span>
+        <span class="chip"><span class="chip-icon">&#x1F4CA;</span> Vend</span>
+      </div>
+    </div>
+
+    <div class="integration-group reveal">
+      <div class="integration-group-title">Databases &amp; Warehouses</div>
+      <div class="integration-chips">
+        <span class="chip"><span class="chip-icon">&#x1F5C4;&#xFE0F;</span> SQL Server</span>
+        <span class="chip"><span class="chip-icon">&#x1F418;</span> PostgreSQL</span>
+        <span class="chip"><span class="chip-icon">&#x1F42C;</span> MySQL</span>
+        <span class="chip"><span class="chip-icon">&#x2601;&#xFE0F;</span> Azure SQL</span>
+        <span class="chip"><span class="chip-icon">&#x1F4C1;</span> Snowflake</span>
+        <span class="chip"><span class="chip-icon">&#x1F527;</span> BigQuery</span>
+      </div>
+    </div>
+
+    <div class="integration-group reveal">
+      <div class="integration-group-title">Files &amp; Spreadsheets</div>
+      <div class="integration-chips">
+        <span class="chip"><span class="chip-icon">&#x1F4C8;</span> Google Sheets</span>
+        <span class="chip"><span class="chip-icon">&#x1F4D7;</span> Excel / OneDrive</span>
+        <span class="chip"><span class="chip-icon">&#x1F4C4;</span> CSV / XLSX Files</span>
+        <span class="chip"><span class="chip-icon">&#x1F4E1;</span> FTP / SFTP Feeds</span>
+        <span class="chip"><span class="chip-icon">&#x1F310;</span> REST / JSON APIs</span>
+        <span class="chip"><span class="chip-icon">&#x1F4CB;</span> XML / EDI Feeds</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section id="cta">
+  <div class="section-inner">
+    <div class="cta-banner reveal">
+      <h2>Have a custom requirement?</h2>
+      <p>
+        Need a bulk product upload, a migration from another platform, or a one-off
+        data cleaning job? Get in touch and let&rsquo;s discuss what you need.
+      </p>
+      <a href="mailto:lasane.786@gmail.com?subject=Custom%20Shopify%20Data%20Request&body=Hi%20Hassan%2C%0A%0AI%20have%20a%20custom%20data%20requirement%3A%0A%0A" class="btn btn-primary">Get In Touch</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-inner">
+    <p class="section-label">Questions</p>
+    <h2 class="section-title">FAQ</h2>
+    <div class="section-line"></div>
+    <div class="faq-list reveal">
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What Shopify plan do I need to import CSV files?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          CSV imports are available on all Shopify plans, including Basic. You can access
+          the import tool via Shopify Admin &rarr; Products &rarr; Import, or for customers
+          via Customers &rarr; Import customers.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Can I request a custom number of rows or specific categories?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          Yes. All files are built to your specification. Just let me know the row count,
+          product categories, or any special fields you need when you email to order, and
+          I&rsquo;ll tailor the file accordingly.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What format are the files delivered in?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          Files are delivered as <strong>.csv</strong> (UTF-8 encoded) which is the format
+          Shopify requires. You can open them in Excel, Google Sheets, or any spreadsheet
+          tool before importing if you want to review or edit them.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Is there a sample I can review first?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          Yes &mdash; just ask in your email and I&rsquo;ll send a small sample file (5&ndash;10 rows)
+          showing the exact column structure before you commit to a full order.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How does the vendor catalog pipeline handle price or stock changes?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          The pipeline compares each product&rsquo;s current data in Shopify against the latest
+          data from the vendor source. Only changed fields (price, stock, description, images)
+          are updated &mdash; unchanged products are skipped to minimise API calls. You can also
+          set rules to never overwrite fields you manage manually in Shopify.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What happens if two platforms record a sale at the same time?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          The sync engine uses a last-write-wins strategy by default, with a full audit log
+          of every stock movement so conflicts can be reviewed. For high-volume stores a
+          queue-based approach (with timestamps) can be configured to prevent overselling.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Can the pipeline run on my own server or cloud account?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          Yes. The pipeline is delivered as self-contained Python scripts or containerised
+          (Docker) and can run on your own server, Azure, AWS, or Google Cloud. Hosting
+          and setup guidance is included, or I can manage deployment as part of the project.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          When will payment be required?
+          <span class="faq-chevron">&#x25BE;</span>
+        </button>
+        <div class="faq-answer">
+          Payment terms are agreed via email before delivery. Full payment integration
+          (card / PayPal) is coming soon. Currently orders are handled directly by email
+          with payment details confirmed in our conversation.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2025 Muhammad Hassan &mdash; <a href="index.html">Portfolio</a> &nbsp;|&nbsp; Data Store</p>
+</footer>
+
+<button id="scroll-top" aria-label="Scroll to top">&#8679;</button>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => io.observe(r));
+
+  // Scroll to top
+  window.addEventListener('scroll', () => {
+    document.getElementById('scroll-top').classList.toggle('visible', window.scrollY > 400);
+  }, { passive: true });
+  document.getElementById('scroll-top').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Hamburger / mobile drawer
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('nav-drawer');
+  hamburger.addEventListener('click', () => {
+    const open = drawer.classList.toggle('open');
+    hamburger.classList.toggle('open', open);
+  });
+  drawer.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      drawer.classList.remove('open');
+      hamburger.classList.remove('open');
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>
